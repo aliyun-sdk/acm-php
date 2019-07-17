@@ -14,57 +14,50 @@ use Psr\Http\Message\ResponseInterface;
 class Client
 {
     const GET_SERVER = "diamond-server/diamond";
+
     const GET_CONFIG = "diamond-server/config.co";
+
     const SET_CONFIG = "diamond-server/basestone.do?method=syncUpdateAll";
+
     const DEL_CONFIG = "diamond-server/datum.do?method=deleteAllDatums";
 
     /**
-     * 命名空间
+     * 参数组
      *
      * @var string
      */
-    protected $namespace;
-
-    /**
-     * 集群名称
-     *
-     * @var string
-     */
-    protected $groupName;
+    private $element;
 
     /**
      * 认证凭证
      *
      * @var AuthCreds
      */
-    protected $authCreds;
+    private $authCreds;
 
     /**
      * HTTP客户端
      *
      * @var HttpClient
      */
-    protected $httpClient;
+    private $httpClient;
 
     /**
      * 可用请求端点
      *
      * @var Endpoint[]
      */
-    protected $endpoints;
+    private $endpoints;
 
     /**
      * Client constructor.
-     * @param Endpoint $endpoint
+     * @param Endpoint  $endpoint
+     * @param Element   $element
      * @param AuthCreds $authCreds
-     * @param string $namespace
-     * @param string $groupName
-     * @throws \Exception
      */
-    public function __construct(Endpoint $endpoint, AuthCreds $authCreds, string $namespace, string $groupName = "DEFAULT_GROUP")
+    public function __construct(Endpoint $endpoint, Element $element, AuthCreds $authCreds)
     {
-        $this->namespace = $namespace;
-        $this->groupName = $groupName;
+        $this->element = $element;
         $this->authCreds = $authCreds;
 
         $handler = HandlerStack::create();
@@ -101,11 +94,10 @@ class Client
      */
     public function read(string $dataId): string
     {
+        $ele = $this->element->withDataId($dataId);
+
         $res = $this->httpClient->get(
-            $this->makeURL(self::GET_CONFIG)
-            . "?tenant={$this->namespace}"
-            . "&dataId={$dataId}"
-            . "&group={$this->groupName}"
+            $this->makeURL(self::GET_CONFIG) . "?" . $ele->toQuery()
         );
 
         return $this->handleResponse($res);
@@ -120,16 +112,11 @@ class Client
      */
     public function write(string $dataId, string $content): void
     {
+        $ele = $this->element->withDataId($dataId);
+
         $res = $this->httpClient->post(
             $this->makeURL(self::SET_CONFIG),
-            [
-                "form_params" => [
-                    "tenant" => $this->namespace,
-                    "dataId" => $dataId,
-                    "group" => $this->groupName,
-                    "content" => $content,
-                ],
-            ]
+            ["form_params" => $ele->toArray(["content" => $content])]
         );
 
         $this->handleResponse($res);
@@ -143,15 +130,11 @@ class Client
      */
     public function remove(string $dataId): void
     {
+        $ele = $this->element->withDataId($dataId);
+
         $res = $this->httpClient->post(
             $this->makeURL(self::DEL_CONFIG),
-            [
-                "form_params" => [
-                    "tenant" => $this->namespace,
-                    "dataId" => $dataId,
-                    "group" => $this->groupName,
-                ],
-            ]
+            ["form_params" => $ele->toArray()]
         );
 
         $this->handleResponse($res);
@@ -162,13 +145,15 @@ class Client
      *
      * @param string $dataId
      * @param string $content
-     * @return string
+     * @return bool
      * @throws \Exception
      */
-    public function watch(string $dataId, string $content): string
+    public function watch(string $dataId, string $content): bool
     {
         $wordDelimiter = chr(37) . chr(48) . chr(50);
         $lineDelimiter = chr(37) . chr(48) . chr(49);
+
+        $args = [$dataId, $this->element->getGroupName(), md5($content), $this->element->getNamespace()];
 
         $res = $this->httpClient->post(
             $this->makeURL(self::GET_CONFIG),
@@ -176,11 +161,11 @@ class Client
                 "headers" => [
                     "longPullingTimeout" => 30 * 1000,
                 ],
-                "body" => "Probe-Modify-Request=" . implode($wordDelimiter, [$dataId, $this->groupName, md5($content), $this->namespace]) . $lineDelimiter,
+                "body" => "Probe-Modify-Request=" . implode($wordDelimiter, $args) . $lineDelimiter,
             ]
         );
 
-        return $this->handleResponse($res);
+        return rtrim($this->handleResponse($res), $lineDelimiter) != "";
     }
 
     /**
@@ -203,10 +188,8 @@ class Client
      */
     private function addHeaders(): \Closure
     {
-        return function (callable $handler)
-        {
-            return function (RequestInterface $request, array $options) use ($handler)
-            {
+        return function (callable $handler) {
+            return function (RequestInterface $request, array $options) use ($handler) {
                 $request = $request
                     ->withHeader("timeStamp", time() * 1000)
                     ->withHeader("Spas-AccessKey", $this->authCreds->getAccessKey());
@@ -226,9 +209,14 @@ class Client
      */
     private function generateSignature(RequestInterface $request): string
     {
-        $string = sprintf("%s+%s+%s", $this->namespace, $this->groupName, $request->getHeaderLine("timeStamp"));
+        $string = sprintf(
+            "%s+%s+%s",
+            $this->element->getNamespace(),
+            $this->element->getGroupName(),
+            $request->getHeaderLine("timeStamp")
+        );
 
-        return base64_encode(hash_hmac('sha1', $string, $this->authCreds->getSecretKey(), true));
+        return base64_encode(hash_hmac('sha1', $string, $this->authCreds->getSecretKey(), TRUE));
     }
 
     /**

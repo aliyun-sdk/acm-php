@@ -9,14 +9,14 @@ namespace aliyunsdk\acm;
 class Endpoint
 {
     /**
-     * 地址
+     * 请求地址
      *
      * @var string
      */
     private $host;
 
     /**
-     * 端口
+     * 请求端口
      *
      * @var integer
      */
@@ -25,7 +25,7 @@ class Endpoint
     /**
      * Endpoint constructor.
      * @param string $host
-     * @param int $port
+     * @param int    $port
      */
     public function __construct(string $host, int $port)
     {

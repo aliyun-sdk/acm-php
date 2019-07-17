@@ -1,5 +1,5 @@
 ## Acm-php
-The [Aliyun ACM](https://www.aliyun.com/product/acm) Client In PHP
+The [Aliyun ACM](https://www.aliyun.com/product/acm) SDK In PHP
 
 ## Installation
 `composer require aliyunsdk/acm`

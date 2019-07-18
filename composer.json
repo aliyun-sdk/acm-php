@@ -1,5 +1,5 @@
 {
-  "name": "aliyunsdk/acm",
+  "name": "aliyunsdk/acm-php",
   "require": {
     "guzzlehttp/guzzle": "^6.3"
   },

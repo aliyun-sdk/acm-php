@@ -1,12 +1,12 @@
 <?php
 
-namespace aliyunsdk\acm;
+namespace AliyunSDK\Acm;
 
 use function GuzzleHttp\Psr7\build_query;
 
 /**
  * Class Element
- * @package aliyunsdk\acm
+ * @package AliyunSDK\Acm
  */
 class Element
 {

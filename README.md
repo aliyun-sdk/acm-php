@@ -2,7 +2,7 @@
 The [Aliyun ACM](https://www.aliyun.com/product/acm) SDK In PHP
 
 ## Installation
-`composer require aliyunsdk/acm-php`
+`composer require aliyun-sdk/acm-php`
 
 ## Usage
 

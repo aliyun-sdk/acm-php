@@ -2,10 +2,10 @@
 
 include "../vendor/autoload.php";
 
-use aliyunsdk\acm\AuthCreds;
-use aliyunsdk\acm\Client;
-use aliyunsdk\acm\Element;
-use aliyunsdk\acm\Endpoint;
+use AliyunSDK\Acm\AuthCreds;
+use AliyunSDK\Acm\Client;
+use AliyunSDK\Acm\Element;
+use AliyunSDK\Acm\Endpoint;
 
 $endpoint = new Endpoint("acm.aliyun.com", 8080);
 $element = new Element("您的命名空间");

@@ -1,10 +1,10 @@
 <?php
 
-namespace aliyunsdk\acm;
+namespace AliyunSDK\Acm;
 
 /**
  * Class AuthCreds
- * @package aliyunsdk\acm
+ * @package AliyunSDK\Acm
  */
 class AuthCreds
 {

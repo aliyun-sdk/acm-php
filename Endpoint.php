@@ -1,10 +1,10 @@
 <?php
 
-namespace aliyunsdk\acm;
+namespace AliyunSDK\Acm;
 
 /**
  * Class Endpoint
- * @package aliyunsdk\acm
+ * @package AliyunSDK\Acm
  */
 class Endpoint
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace aliyunsdk\acm;
+namespace AliyunSDK\Acm;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\HandlerStack;
@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class Client
- * @package aliyunsdk\acm
+ * @package AliyunSDK\Acm
  */
 class Client
 {

@@ -51,9 +51,10 @@ class Client
 
     /**
      * Client constructor.
-     * @param Endpoint  $endpoint
-     * @param Element   $element
+     * @param Endpoint $endpoint
+     * @param Element $element
      * @param AuthCreds $authCreds
+     * @throws \Exception
      */
     public function __construct(Endpoint $endpoint, Element $element, AuthCreds $authCreds)
     {
